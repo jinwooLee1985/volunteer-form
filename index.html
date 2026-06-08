@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>은하리 봉사단 — 봉사활동 신청</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #1B3668;
+    --cyan: #00AEEF;
+    --cyan-light: #E6F6FD;
+    --gray-50: #F7F8FA;
+    --gray-100: #EAECF0;
+    --gray-400: #9DA3AE;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --green: #16A34A;
+    --green-light: #DCFCE7;
+    --red: #DC2626;
+    --radius: 10px;
+    --radius-lg: 16px;
+  }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--gray-50);
+    min-height: 100vh;
+    color: var(--gray-900);
+    padding: 2rem 1rem 4rem;
+  }
+
+  .page-wrap { max-width: 560px; margin: 0 auto; }
+
+  .header { text-align: center; margin-bottom: 2rem; }
+
+  .header-badge {
+    display: inline-block;
+    background: var(--navy);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 4px 14px;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+  }
+
+  .header h1 { font-size: 22px; font-weight: 600; color: var(--navy); line-height: 1.4; margin-bottom: 0.5rem; }
+  .header p { font-size: 13px; color: var(--gray-400); }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--gray-100);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1.5px solid var(--cyan-light);
+  }
+
+  .field { margin-bottom: 1.25rem; }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 6px;
+  }
+
+  label .required { color: var(--cyan); margin-left: 3px; }
+  label .hint { font-weight: 400; color: var(--gray-400); font-size: 12px; margin-left: 4px; }
+
+  input[type="text"],
+  input[type="date"],
+  select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--gray-100);
+    border-radius: var(--radius);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    color: var(--gray-900);
+    background: var(--gray-50);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--cyan);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0,174,239,0.12);
+  }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* 시간 드롭박스 행 — 시작/종료 + 자동계산 결과 */
+  .time-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: end;
+  }
+
+  .select-wrap { position: relative; }
+  .select-wrap select { padding-right: 36px; cursor: pointer; }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: var(--gray-400);
+    pointer-events: none;
+  }
+
+  /* 자동계산 결과 박스 */
+  .duration-box {
+    background: var(--cyan-light);
+    border: 1px solid rgba(0,174,239,0.25);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+  }
+
+  .duration-label {
+    font-size: 12px;
+    color: var(--cyan);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .duration-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .duration-empty {
+    font-size: 13px;
+    color: var(--gray-400);
+  }
+
+  /* 유효성 오류 */
+  .field-error {
+    font-size: 12px;
+    color: var(--red);
+    margin-top: 5px;
+    display: none;
+  }
+
+  .field.has-error input,
+  .field.has-error select {
+    border-color: var(--red);
+  }
+
+  .field.has-error .field-error { display: block; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.02em;
+  }
+
+  .submit-btn:hover { background: #152b56; }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { background: var(--gray-400); cursor: not-allowed; }
+
+  .notice {
+    font-size: 12px;
+    color: var(--gray-400);
+    text-align: center;
+    margin-top: 1rem;
+    line-height: 1.7;
+  }
+
+  /* 모달 */
+  .result-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .result-overlay.show { display: flex; }
+
+  .result-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .result-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.25rem; font-size: 26px;
+  }
+  .result-icon.success { background: var(--green-light); color: var(--green); }
+  .result-icon.error   { background: #FEE2E2; color: var(--red); }
+
+  .result-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 0.5rem; color: var(--navy); }
+  .result-card p  { font-size: 13px; color: var(--gray-400); line-height: 1.7; margin-bottom: 1.5rem; white-space: pre-line; }
+
+  .result-close {
+    padding: 10px 28px;
+    background: var(--navy); color: #fff;
+    border: none; border-radius: var(--radius);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px; font-weight: 500; cursor: pointer;
+  }
+
+  /* 개인정보 동의 */
+  .privacy-box {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-100);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-size: 12px;
+    color: var(--gray-700);
+    line-height: 1.8;
+    margin-bottom: 14px;
+    max-height: 130px;
+    overflow-y: auto;
+  }
+
+  .privacy-box b {
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  .privacy-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 6px;
+  }
+
+  .privacy-table th,
+  .privacy-table td {
+    border: 1px solid var(--gray-100);
+    padding: 5px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .privacy-table th {
+    background: var(--cyan-light);
+    color: var(--navy);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .consent-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .consent-check {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--gray-400);
+    border-radius: 4px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    background: #fff;
+  }
+
+  #privacy_agree:checked ~ label .consent-check,
+  .consent-check.checked {
+    background: var(--cyan);
+    border-color: var(--cyan);
+  }
+
+  .consent-check::after {
+    content: '';
+    width: 5px;
+    height: 9px;
+    border: 2px solid #fff;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translateY(-1px);
+    display: none;
+  }
+
+  #privacy_agree:checked ~ label .consent-check::after,
+  .consent-check.checked::after { display: block; }
+
+  .consent-text {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.5;
+  }
+
+  .consent-text strong { color: var(--navy); font-weight: 600; }
+
+  .privacy-error {
+    font-size: 12px;
+    color: var(--red);
+    margin-top: 6px;
+    display: none;
+  }
+
+  .privacy-error.show { display: block; }
+
+  /* 구분선 */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--gray-100);
+    margin: 1.25rem 0;
+  }
+
+  .spinner {
+    display: none; width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.7s linear infinite; margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 480px) {
+    .row-2, .time-row { grid-template-columns: 1fr; }
+    .card { padding: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <div class="header">
+    <div class="header-badge">은어송하늘채리버뷰 · 은하리 봉사단</div>
+    <h1>봉사활동 시간 신청</h1>
+    <p>참여를 원하시는 일정을 선택하여 신청해 주세요.</p>
+  </div>
+
+  <form id="volunteerForm" novalidate>
+
+    <!-- 신청자 정보 -->
+    <div class="card">
+      <div class="section-title">신청자 정보</div>
+
+      <div class="row-2">
+        <div class="field" id="f-name">
+          <label for="name">이름 <span class="required">*</span></label>
+          <input type="text" id="name" name="name" placeholder="홍길동" autocomplete="name">
+          <div class="field-error">이름을 입력해 주세요.</div>
+        </div>
+        <div class="field" id="f-unit">
+          <label for="unit">동호수 <span class="required">*</span></label>
+          <input type="text" id="unit" name="unit" placeholder="101동 1201호">
+          <div class="field-error">동호수를 입력해 주세요.</div>
+        </div>
+      </div>
+
+      <div class="field" id="f-portal">
+        <label for="portal_id">1365 자원봉사 포털 ID <span class="required">*</span>
+          <span class="hint">(봉사실적 연계용)</span>
+        </label>
+        <input type="text" id="portal_id" name="portal_id" placeholder="1365 포털 아이디 입력">
+        <div class="field-error">포털 ID를 입력해 주세요.</div>
+      </div>
+    </div>
+
+    <!-- 봉사 일정 -->
+    <div class="card">
+      <div class="section-title">봉사 일정</div>
+
+      <div class="field" id="f-date">
+        <label for="vol_date">봉사 날짜 <span class="required">*</span></label>
+        <input type="date" id="vol_date" name="vol_date">
+        <div class="field-error">날짜를 선택해 주세요.</div>
+      </div>
+
+      <div class="field" id="f-time">
+        <label>봉사 시간 <span class="required">*</span></label>
+
+        <div class="time-row" style="margin-bottom: 8px;">
+          <div>
+            <div style="font-size: 12px; color: var(--gray-400); margin-bottom: 5px;">시작 시간</div>
+            <div class="select-wrap">
+              <select id="time_start" name="time_start">
+                <option value="">-- 선택 --</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 12px; color: var(--gray-400); margin-bottom: 5px;">종료 시간</div>
+            <div class="select-wrap">
+              <select id="time_end" name="time_end">
+                <option value="">-- 선택 --</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 자동 계산 결과 -->
+        <div class="duration-box" id="durationBox">
+          <span class="duration-label">봉사 시간</span>
+          <span class="duration-empty" id="durationEmpty">시작·종료 시간을 선택하면 자동 계산됩니다</span>
+          <span class="duration-value" id="durationValue" style="display:none;"></span>
+        </div>
+
+        <div class="field-error" id="time-error">시작·종료 시간을 모두 선택해 주세요.</div>
+      </div>
+    </div>
+
+    <!-- 개인정보 동의 -->
+    <div class="card">
+      <div class="section-title">개인정보 수집·이용 동의</div>
+
+      <div class="privacy-box">
+        <b>수집 목적:</b> 봉사활동 신청 접수 및 1365 자원봉사포털 실적 연계<br>
+        <b>수집 항목:</b> 이름, 동호수, 1365 포털 ID, 봉사 일자·시간<br>
+        <b>보유·이용 기간:</b> 해당 연도 봉사활동 종료 후 1년<br>
+        <b>제3자 제공:</b> 1365 자원봉사포털 (실적 등록 목적에 한함)<br><br>
+        <table class="privacy-table">
+          <thead>
+            <tr><th>항목</th><th>수집 목적</th><th>보유 기간</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>이름, 동호수</td>
+              <td>신청자 확인 및 봉사 일정 관리</td>
+              <td rowspan="2">활동 종료 후 1년</td>
+            </tr>
+            <tr>
+              <td>1365 포털 ID</td>
+              <td>봉사 실적 연계 등록</td>
+            </tr>
+            <tr>
+              <td>봉사 일자·시간</td>
+              <td>봉사활동 기록 관리</td>
+              <td>활동 종료 후 1년</td>
+            </tr>
+          </tbody>
+        </table><br>
+        위 개인정보 수집·이용에 동의하지 않을 권리가 있으며, 동의 거부 시 봉사활동 신청이 제한될 수 있습니다.
+      </div>
+
+      <label class="consent-row" id="consentLabel" onclick="toggleConsent()">
+        <div class="consent-check" id="consentCheck"></div>
+        <span class="consent-text">
+          <strong>위 개인정보 수집·이용에 동의합니다.</strong> (필수)
+        </span>
+      </label>
+      <div class="privacy-error" id="privacy-error">개인정보 수집·이용에 동의해 주세요.</div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">
+      <span id="btn-text">신청하기</span>
+      <div class="spinner" id="spinner"></div>
+    </button>
+
+    <p class="notice">
+      제출된 정보는 봉사활동 운영 목적으로만 활용됩니다.<br>
+      신청 후 변경·취소는 운영진에게 연락 주세요.
+    </p>
+
+  </form>
+</div>
+
+<!-- 결과 모달 -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card">
+    <div class="result-icon" id="resultIcon"></div>
+    <h2 id="resultTitle"></h2>
+    <p id="resultMsg"></p>
+    <button class="result-close" onclick="closeResult()">확인</button>
+  </div>
+</div>
+
+<script>
+	const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_jKBEaaEaETyMIydva7Abs299dyyWHH2mXEVe31BwOCazNlIGERXpHo4wP1YfCDtd/exec";
+
+	// 날짜 기본값
+	document.getElementById('vol_date').valueAsDate = new Date();
+
+	// ── 시간 드롭박스 옵션 생성 (30분 단위, 06:00~22:00) ──
+	function makeTimeOptions(selectEl, defaultLabel) {
+	selectEl.innerHTML = `<option value="">${defaultLabel}</option>`;
+    for (let h = 6; h <= 22; h++) {
+      ['00', '30'].forEach(m => {
+        if (h === 22 && m === '30') return;
+        const val = `${String(h).padStart(2,'0')}:${m}`;
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        selectEl.appendChild(opt);
+      });
+    }
+  }
+
+  const startSel = document.getElementById('time_start');
+  const endSel   = document.getElementById('time_end');
+  makeTimeOptions(startSel, '-- 시작 --');
+  makeTimeOptions(endSel,   '-- 종료 --');
+
+  // ── 자동 계산 ──
+  function calcDuration() {
+    const s = startSel.value;
+    const e = endSel.value;
+    const emptyEl = document.getElementById('durationEmpty');
+    const valueEl = document.getElementById('durationValue');
+    const box     = document.getElementById('durationBox');
+
+    if (!s || !e) {
+      emptyEl.style.display = '';
+      valueEl.style.display = 'none';
+      box.style.borderColor = 'rgba(0,174,239,0.25)';
+      return;
+    }
+
+    const [sh, sm] = s.split(':').map(Number);
+    const [eh, em] = e.split(':').map(Number);
+    const diffMin  = (eh * 60 + em) - (sh * 60 + sm);
+
+    emptyEl.style.display = 'none';
+    valueEl.style.display = '';
+
+    if (diffMin <= 0) {
+      valueEl.textContent = '⚠ 종료 시간이 시작 시간보다 빠릅니다';
+      valueEl.style.color = 'var(--red)';
+      box.style.borderColor = 'rgba(220,38,38,0.3)';
+    } else {
+      const hrs = Math.floor(diffMin / 60);
+      const min = diffMin % 60;
+      const label = hrs > 0 && min > 0 ? `${hrs}시간 ${min}분`
+                  : hrs > 0            ? `${hrs}시간`
+                  :                      `${min}분`;
+      valueEl.textContent = label;
+      valueEl.style.color = 'var(--navy)';
+      box.style.borderColor = 'rgba(0,174,239,0.25)';
+    }
+  }
+
+  startSel.addEventListener('change', calcDuration);
+  endSel.addEventListener('change', calcDuration);
+
+  // ── 개인정보 동의 토글 ──
+  let privacyAgreed = false;
+  function toggleConsent() {
+    privacyAgreed = !privacyAgreed;
+    const check = document.getElementById('consentCheck');
+    const errEl = document.getElementById('privacy-error');
+    if (privacyAgreed) {
+      check.classList.add('checked');
+      errEl.classList.remove('show');
+    } else {
+      check.classList.remove('checked');
+    }
+  }
+
+  // ── 유효성 검사 헬퍼 ──
+  function validate(fieldId, condition) {
+    const el = document.getElementById(fieldId);
+    if (condition) { el.classList.remove('has-error'); return true; }
+    else           { el.classList.add('has-error'); return false; }
+  }
+
+  // ── 제출 ──
+  document.getElementById('volunteerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name      = document.getElementById('name').value.trim();
+    const unit      = document.getElementById('unit').value.trim();
+    const portal_id = document.getElementById('portal_id').value.trim();
+    const vol_date  = document.getElementById('vol_date').value;
+    const t_start   = startSel.value;
+    const t_end     = endSel.value;
+
+    // 시간 유효성 (diffMin > 0 필요)
+    let timeOk = false;
+    if (t_start && t_end) {
+      const [sh,sm] = t_start.split(':').map(Number);
+      const [eh,em] = t_end.split(':').map(Number);
+      timeOk = (eh*60+em) - (sh*60+sm) > 0;
+    }
+
+    const ok = [
+      validate('f-name',   !!name),
+      validate('f-unit',   !!unit),
+      validate('f-portal', !!portal_id),
+      validate('f-date',   !!vol_date),
+    ].every(Boolean) && timeOk;
+
+    // 시간 오류 표시
+    const timeErrEl = document.getElementById('time-error');
+    const fTime     = document.getElementById('f-time');
+    if (!timeOk) {
+      timeErrEl.style.display = 'block';
+      fTime.classList.add('has-error');
+    } else {
+      timeErrEl.style.display = 'none';
+      fTime.classList.remove('has-error');
+    }
+
+    // 동의 오류 표시
+    const privErrEl = document.getElementById('privacy-error');
+    if (!privacyAgreed) privErrEl.classList.add('show');
+    else                privErrEl.classList.remove('show');
+
+    if (!ok || !privacyAgreed) return;
+
+    const [sh,sm] = t_start.split(':').map(Number);
+    const [eh,em] = t_end.split(':').map(Number);
+    const diffMin = (eh*60+em)-(sh*60+sm);
+    const hrs = Math.floor(diffMin/60);
+    const min = diffMin%60;
+    const durationStr = hrs>0&&min>0?`${hrs}시간 ${min}분`:hrs>0?`${hrs}시간`:`${min}분`;
+
+    const timeslot = `${t_start}~${t_end} (${durationStr})`;
+
+    const payload = {
+      name, unit, portal_id, vol_date,
+      time_start: t_start,
+      time_end:   t_end,
+      duration:   durationStr,
+      timeslot,
+      submitted_at: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
+    };
+
+    setLoading(true);
+
+    try {
+      if (APPS_SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL") {
+        await new Promise(r => setTimeout(r, 700));
+        console.log('제출 데이터:', payload);
+        showResult('success', '신청 완료',
+          `${name}님의 봉사활동 신청이 접수되었습니다.\n\n일시: ${vol_date}\n시간: ${timeslot}`);
+        e.target.reset();
+        startSel.value = ''; endSel.value = ''; calcDuration();
+        privacyAgreed = false; document.getElementById('consentCheck').classList.remove('checked');
+        return;
+      }
+
+      const res  = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (data.result === 'success') {
+        showResult('success', '신청 완료',
+          `${name}님의 봉사활동 신청이 접수되었습니다.\n\n일시: ${vol_date}\n시간: ${timeslot}`);
+        e.target.reset();
+        startSel.value = ''; endSel.value = ''; calcDuration();
+        privacyAgreed = false; document.getElementById('consentCheck').classList.remove('checked');
+      } else {
+        throw new Error(data.message || '서버 오류');
+      }
+    } catch (err) {
+      showResult('error', '오류 발생',
+        '신청 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.\n(' + err.message + ')');
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  function setLoading(on) {
+    document.getElementById('btn-text').style.display = on ? 'none' : 'block';
+    document.getElementById('spinner').style.display  = on ? 'block' : 'none';
+    document.getElementById('submitBtn').disabled = on;
+  }
+
+  function showResult(type, title, msg) {
+    document.getElementById('resultIcon').textContent = type === 'success' ? '✓' : '✕';
+    document.getElementById('resultIcon').className   = 'result-icon ' + type;
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultMsg').textContent   = msg;
+    document.getElementById('resultOverlay').classList.add('show');
+  }
+
+  function closeResult() {
+    document.getElementById('resultOverlay').classList.remove('show');
+  }
+</script>
+</body>
+</html>
