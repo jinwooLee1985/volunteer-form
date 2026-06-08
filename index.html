@@ -511,14 +511,14 @@
 </div>
 
 <script>
-	const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwS6xzMN0DnuyxqIP8iAEGUYMa0zFk5U2OwLNMwHWVIFNIwgCKBDhJfuMseUhBKH_GA/exec";
+  const APPS_SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL";
 
-	// 날짜 기본값
-	document.getElementById('vol_date').valueAsDate = new Date();
+  // 날짜 기본값
+  document.getElementById('vol_date').valueAsDate = new Date();
 
-	// ── 시간 드롭박스 옵션 생성 (30분 단위, 06:00~22:00) ──
-	function makeTimeOptions(selectEl, defaultLabel) {
-	selectEl.innerHTML = `<option value="">${defaultLabel}</option>`;
+  // ── 시간 드롭박스 옵션 생성 (30분 단위, 06:00~22:00) ──
+  function makeTimeOptions(selectEl, defaultLabel) {
+    selectEl.innerHTML = `<option value="">${defaultLabel}</option>`;
     for (let h = 6; h <= 22; h++) {
       ['00', '30'].forEach(m => {
         if (h === 22 && m === '30') return;
@@ -674,22 +674,21 @@
         return;
       }
 
-      const res  = await fetch(APPS_SCRIPT_URL, {
+      // no-cors: CORS 우회 — Apps Script는 데이터를 정상 수신하나 응답을 읽을 수 없음
+      await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload)
       });
-      const data = await res.json();
 
-      if (data.result === 'success') {
-        showResult('success', '신청 완료',
-          `${name}님의 봉사활동 신청이 접수되었습니다.\n\n일시: ${vol_date}\n시간: ${timeslot}`);
-        e.target.reset();
-        startSel.value = ''; endSel.value = ''; calcDuration();
-        privacyAgreed = false; document.getElementById('consentCheck').classList.remove('checked');
-      } else {
-        throw new Error(data.message || '서버 오류');
-      }
+      // no-cors는 응답 확인 불가 → 전송 성공으로 간주
+      showResult('success', '신청 완료',
+        `${name}님의 봉사활동 신청이 접수되었습니다.\n\n일시: ${vol_date}\n시간: ${timeslot}`);
+      e.target.reset();
+      startSel.value = ''; endSel.value = ''; calcDuration();
+      privacyAgreed = false; document.getElementById('consentCheck').classList.remove('checked');
+
     } catch (err) {
       showResult('error', '오류 발생',
         '신청 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.\n(' + err.message + ')');
